@@ -158,7 +158,7 @@ class ProofServiceTest {
         ProofRecord proof = pendingProof();
         when(proofDao.findByIdAndUser(10, 1)).thenReturn(proof);
         when(userDao.decrementCredit(1, 1)).thenReturn(1);
-        when(chain.storeProof(Numeric.hexStringToByteArray(ABC_HASH), proof.getUploadTs())).thenReturn(TX_HASH);
+        when(chain.storeProof(Numeric.hexStringToByteArray(ABC_HASH), proof.getUploadTs(), ADDR)).thenReturn(TX_HASH);
 
         ProofRecord result = service.store(ADDR, 10);
 
@@ -204,7 +204,7 @@ class ProofServiceTest {
         ProofRecord proof = pendingProof();
         when(proofDao.findByIdAndUser(10, 1)).thenReturn(proof);
         when(userDao.decrementCredit(1, 1)).thenReturn(1);
-        when(chain.storeProof(any(byte[].class), anyLong()))
+        when(chain.storeProof(any(byte[].class), anyLong(), anyString()))
                 .thenThrow(new BizException(500, "链上交易失败"));
 
         BizException ex = assertThrows(BizException.class, () -> service.store(ADDR, 10));

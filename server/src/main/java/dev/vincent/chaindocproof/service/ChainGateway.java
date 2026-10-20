@@ -146,20 +146,21 @@ public class ChainGateway {
     }
 
     /**
-     * 存证上链：调用 DocProof.storeProof(hash, timestamp)，只写入链上记录
+     * 存证上链：调用 DocProof.storeProof(hash, timestamp, user)，只写入链上记录
      * （DocToken 在购买次数时已由用户 burn 销毁，此处不再消耗代币）
      *
      * @param hash      文件 SHA-256 字节
      * @param timestamp 文件上传时间戳（秒）
+     * @param user      存证用户钱包地址（本合约 msg.sender 恒为后端钱包，用户地址由后端显式传入）
      * @return 交易 hash
      */
-    public String storeProof(byte[] hash, long timestamp) {
+    public String storeProof(byte[] hash, long timestamp, String user) {
         if (hash == null || hash.length != 32) {
             throw new BizException(400, "存证 hash 必须为 32 字节（SHA-256）");
         }
         // 合约参数类型为 bytes32，必须用静态 Bytes32 编码（不能用动态 bytes）
         Function function = new Function("storeProof",
-                List.of(new Bytes32(hash), new Uint256(BigInteger.valueOf(timestamp))), List.of());
+                List.of(new Bytes32(hash), new Uint256(BigInteger.valueOf(timestamp)), new Address(user)), List.of());
         return sendTx(contract.getDocProof(), FunctionEncoder.encode(function));
     }
 

@@ -86,7 +86,7 @@ public class ProofService {
      * 存证上链：
      * 1. 记录必须存在、属于当前用户、状态为 PENDING
      * 2. 原子扣 1 次次数（余额不足直接失败）
-     * 3. 调用 DocProof.storeProof 上链（只写链上记录），链上失败则回补次数
+     * 3. 调用 DocProof.storeProof(hash, ts, 用户地址) 上链（只写链上记录），链上失败则回补次数
      * 4. 回写交易 hash 与状态，记流水
      */
     public ProofRecord store(String address, long proofId) {
@@ -103,7 +103,8 @@ public class ProofService {
         }
         String txHash;
         try {
-            txHash = chain.storeProof(Numeric.hexStringToByteArray(proof.getFileHash()), proof.getUploadTs());
+            txHash = chain.storeProof(Numeric.hexStringToByteArray(proof.getFileHash()), proof.getUploadTs(),
+                    address.toLowerCase());
         } catch (BizException e) {
             // 链上失败，回补次数，避免用户白扣
             userDao.incrementCredit(user.getId(), 1);
